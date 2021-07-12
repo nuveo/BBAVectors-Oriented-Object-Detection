@@ -2,7 +2,6 @@ build
 polyiou_wrap.cxx
 .idea/DOTAPreprocess.iml
 *.so
-*.jpg
 **/.idea/
 *pyc
 examplesplit
