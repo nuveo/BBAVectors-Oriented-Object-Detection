@@ -27,16 +27,8 @@ class CUSTOM(BaseDataset):
         self.label_path = os.path.join(data_dir, 'labelTxt')
 
     def load_img_ids(self):
-        if self.phase == 'train':
-            image_set_index_file = os.path.join(self.data_dir, 'trainval.txt')
-        else:
-            image_set_index_file = os.path.join(
-                self.data_dir, self.phase + '.txt')
-        assert os.path.exists(image_set_index_file), 'Path does not exist: {}'.format(
-            image_set_index_file)
-        with open(image_set_index_file, 'r') as f:
-            lines = f.readlines()
-        image_lists = [line.strip() for line in lines]
+        files = os.listdir(os.path.join(self.data_dir, 'images'))
+        image_lists = [f.strip().rsplit(".", 1)[0] for f in files]
         return image_lists
 
     def load_image(self, index):

@@ -31,7 +31,7 @@ def _get_border(size, border):
 def random_crop_info(h, w):
     if np.random.random() < 0.3:
         max_wh = max(h, w)
-        random_size = max_wh * np.random.choice(np.arange(0.8, 1.2, 0.1))
+        random_size = max_wh * np.random.choice(np.arange(0.9, 1.1, 0.1))
         w_border = _get_border(size=w, border=32)
         h_border = _get_border(size=h, border=32)
         random_center_x = np.random.randint(low=w_border, high=w - w_border)

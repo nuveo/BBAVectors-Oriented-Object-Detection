@@ -2,11 +2,12 @@ import argparse
 import train
 import test
 import eval
+from attrdict import AttrDict
 from datasets.dataset_dota import DOTA
 from datasets.dataset_hrsc import HRSC
 from datasets.dataset_custom import CUSTOM
 from models import ctrbox_net
-import decoder
+from decoder import DecDecoder
 import os
 
 
@@ -32,7 +33,7 @@ def parse_args():
                         help='Number of gpus, ngpus>1 for multigpu')
     parser.add_argument('--resume_train', type=str,
                         default='', help='Weights resumed in training')
-    parser.add_argument('--resume', type=str, default='model_50.pth',
+    parser.add_argument('--resume', type=str, default='model_last.pth',
                         help='Weights resumed in testing and evaluation')
     parser.add_argument('--dataset', type=str,
                         default='custom', help='Name of dataset')
@@ -46,8 +47,7 @@ def parse_args():
     return args
 
 
-if __name__ == '__main__':
-    args = parse_args()
+def main(args):
     dataset = {'dota': DOTA, 'hrsc': HRSC, 'custom': CUSTOM}
     num_classes = {'dota': 15, 'hrsc': 1, 'custom': 3}
     heads = {'hm': num_classes[args.dataset],
@@ -62,9 +62,9 @@ if __name__ == '__main__':
                               final_kernel=1,
                               head_conv=256)
 
-    decoder = decoder.DecDecoder(K=args.K,
-                                 conf_thresh=args.conf_thresh,
-                                 num_classes=num_classes[args.dataset])
+    decoder = DecDecoder(K=args.K,
+                         conf_thresh=args.conf_thresh,
+                         num_classes=num_classes[args.dataset])
     if args.phase == 'train':
         ctrbox_obj = train.TrainModule(dataset=dataset,
                                        num_classes=num_classes,
@@ -81,3 +81,8 @@ if __name__ == '__main__':
         ctrbox_obj = eval.EvalModule(
             dataset=dataset, num_classes=num_classes, model=model, decoder=decoder)
         ctrbox_obj.evaluation(args, down_ratio=down_ratio)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
