@@ -18,14 +18,17 @@ def collater(data):
         out_data_dict[name] = torch.stack(out_data_dict[name], dim=0)
     return out_data_dict
 
+
 class TrainModule(object):
     def __init__(self, dataset, num_classes, model, decoder, down_ratio):
         torch.manual_seed(317)
         self.dataset = dataset
         self.dataset_phase = {'dota': ['train'],
-                              'hrsc': ['train', 'test']}
+                              'hrsc': ['train', 'test'],
+                              'custom': ['train']}
         self.num_classes = num_classes
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
         self.decoder = decoder
         self.down_ratio = down_ratio
@@ -43,8 +46,10 @@ class TrainModule(object):
         }, path)
 
     def load_model(self, model, optimizer, resume, strict=True):
-        checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
-        print('loaded weights from {}, epoch {}'.format(resume, checkpoint['epoch']))
+        checkpoint = torch.load(
+            resume, map_location=lambda storage, loc: storage)
+        print('loaded weights from {}, epoch {}'.format(
+            resume, checkpoint['epoch']))
         state_dict_ = checkpoint['model_state_dict']
         state_dict = {}
         for k in state_dict_:
@@ -57,7 +62,7 @@ class TrainModule(object):
             for k in state_dict:
                 if k in model_state_dict:
                     if state_dict[k].shape != model_state_dict[k].shape:
-                        print('Skip loading parameter {}, required shape{}, ' \
+                        print('Skip loading parameter {}, required shape{}, '
                               'loaded shape{}.'.format(k, model_state_dict[k].shape, state_dict[k].shape))
                         state_dict[k] = model_state_dict[k]
                 else:
@@ -78,22 +83,24 @@ class TrainModule(object):
 
     def train_network(self, args):
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(), args.init_lr)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
+            self.optimizer, gamma=0.96, last_epoch=-1)
         save_path = 'weights_'+args.dataset
         start_epoch = 1
-        
+
         # add resume part for continuing training when break previously, 10-16-2020
         if args.resume_train:
-            self.model, self.optimizer, start_epoch = self.load_model(self.model, 
-                                                                        self.optimizer, 
-                                                                        args.resume_train, 
-                                                                        strict=True)
-        # end 
+            self.model, self.optimizer, start_epoch = self.load_model(self.model,
+                                                                      self.optimizer,
+                                                                      args.resume_train,
+                                                                      strict=True)
+        # end
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        if args.ngpus>1:
+        if args.ngpus > 1:
             if torch.cuda.device_count() > 1:
                 print("Let's use", torch.cuda.device_count(), "GPUs!")
                 # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
@@ -114,12 +121,12 @@ class TrainModule(object):
 
         dsets_loader = {}
         dsets_loader['train'] = torch.utils.data.DataLoader(dsets['train'],
-                                                           batch_size=args.batch_size,
-                                                           shuffle=True,
-                                                           num_workers=args.num_workers,
-                                                           pin_memory=True,
-                                                           drop_last=True,
-                                                           collate_fn=collater)
+                                                            batch_size=args.batch_size,
+                                                            shuffle=True,
+                                                            num_workers=args.num_workers,
+                                                            pin_memory=True,
+                                                            drop_last=True,
+                                                            collate_fn=collater)
 
         print('Starting training...')
         train_loss = []
@@ -133,7 +140,8 @@ class TrainModule(object):
             train_loss.append(epoch_loss)
             self.scheduler.step(epoch)
 
-            np.savetxt(os.path.join(save_path, 'train_loss.txt'), train_loss, fmt='%.6f')
+            np.savetxt(os.path.join(save_path, 'train_loss.txt'),
+                       train_loss, fmt='%.6f')
 
             if epoch % 5 == 0 or epoch > 20:
                 self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
@@ -141,10 +149,11 @@ class TrainModule(object):
                                 self.model,
                                 self.optimizer)
 
-            if 'test' in self.dataset_phase[args.dataset] and epoch%5==0:
+            if 'test' in self.dataset_phase[args.dataset] and epoch % 5 == 0:
                 mAP = self.dec_eval(args, dsets['test'])
                 ap_list.append(mAP)
-                np.savetxt(os.path.join(save_path, 'ap_list.txt'), ap_list, fmt='%.6f')
+                np.savetxt(os.path.join(save_path, 'ap_list.txt'),
+                           ap_list, fmt='%.6f')
 
             self.save_model(os.path.join(save_path, 'model_last.pth'),
                             epoch,
@@ -159,7 +168,8 @@ class TrainModule(object):
         running_loss = 0.
         for data_dict in data_loader:
             for name in data_dict:
-                data_dict[name] = data_dict[name].to(device=self.device, non_blocking=True)
+                data_dict[name] = data_dict[name].to(
+                    device=self.device, non_blocking=True)
             if phase == 'train':
                 self.optimizer.zero_grad()
                 with torch.enable_grad():
@@ -177,7 +187,6 @@ class TrainModule(object):
         print('{} loss: {}'.format(phase, epoch_loss))
         return epoch_loss
 
-
     def dec_eval(self, args, dsets):
         result_path = 'result_'+args.dataset
         if not os.path.exists(result_path):
@@ -185,7 +194,7 @@ class TrainModule(object):
 
         self.model.eval()
         func_utils.write_results(args,
-                                 self.model,dsets,
+                                 self.model, dsets,
                                  self.down_ratio,
                                  self.device,
                                  self.decoder,

@@ -16,9 +16,10 @@ import os
 #import cPickle
 import numpy as np
 import matplotlib.pyplot as plt
-from . import polyiou
+import polyiou
 from functools import partial
 import cv2
+
 
 def parse_gt(filename):
     objects = []
@@ -37,10 +38,10 @@ def parse_gt(filename):
         mbox_ang = float(obj.find('mbox_ang').text)*180/np.pi
         rect = ((mbox_cx, mbox_cy), (mbox_w, mbox_h), mbox_ang)
         pts_4 = cv2.boxPoints(rect)  # 4 x 2
-        bl = pts_4[0,:]
-        tl = pts_4[1,:]
-        tr = pts_4[2,:]
-        br = pts_4[3,:]
+        bl = pts_4[0, :]
+        tl = pts_4[1, :]
+        tr = pts_4[2, :]
+        br = pts_4[3, :]
         object_struct['name'] = 'ship'
         object_struct['difficult'] = difficult
         object_struct['bbox'] = [float(tl[0]),
@@ -53,6 +54,7 @@ def parse_gt(filename):
                                  float(bl[1])]
         objects.append(object_struct)
     return objects
+
 
 def voc_ap(rec, prec, use_07_metric=False):
     """ ap = voc_ap(rec, prec, [use_07_metric])
@@ -127,7 +129,7 @@ def voc_eval(detpath,
 
     BB = np.array([[float(z) for z in x[2:]] for x in splitlines])
 
-    if len(confidence)>1:
+    if len(confidence) > 1:
         # sort by confidence
         sorted_ind = np.argsort(-confidence)
         sorted_scores = np.sort(-confidence)
@@ -135,7 +137,7 @@ def voc_eval(detpath,
         #print('check sorted_scores: ', sorted_scores)
         #print('check sorted_ind: ', sorted_ind)
 
-        ## note the usage only in numpy not for list
+        # note the usage only in numpy not for list
         BB = BB[sorted_ind, :]
         image_ids = [image_ids[x] for x in sorted_ind]
     #print('check imge_ids: ', image_ids)
@@ -150,7 +152,7 @@ def voc_eval(detpath,
         ovmax = -np.inf
         BBGT = R['bbox'].astype(float)
 
-        ## compute det bb with each BBGT
+        # compute det bb with each BBGT
 
         if BBGT.size > 0:
             # compute overlaps
@@ -158,7 +160,7 @@ def voc_eval(detpath,
 
             # 1. calculate the overlaps between hbbs, if the iou between hbbs are 0, the iou between obbs are 0, too.
             # pdb.set_trace()
-            BBGT_xmin =  np.min(BBGT[:, 0::2], axis=1)
+            BBGT_xmin = np.min(BBGT[:, 0::2], axis=1)
             BBGT_ymin = np.min(BBGT[:, 1::2], axis=1)
             BBGT_xmax = np.max(BBGT[:, 0::2], axis=1)
             BBGT_ymax = np.max(BBGT[:, 1::2], axis=1)
@@ -186,11 +188,13 @@ def voc_eval(detpath,
             BBGT_keep = BBGT[BBGT_keep_mask, :]
             BBGT_keep_index = np.where(overlaps > 0)[0]
             # pdb.set_trace()
+
             def calcoverlaps(BBGT_keep, bb):
                 overlaps = []
                 for index, GT in enumerate(BBGT_keep):
 
-                    overlap = polyiou.iou_poly(polyiou.VectorDouble(BBGT_keep[index]), polyiou.VectorDouble(bb))
+                    overlap = polyiou.iou_poly(polyiou.VectorDouble(
+                        BBGT_keep[index]), polyiou.VectorDouble(bb))
                     overlaps.append(overlap)
                 return overlaps
             if len(BBGT_keep) > 0:
@@ -216,7 +220,6 @@ def voc_eval(detpath,
     # print('check fp:', fp)
     # print('check tp', tp)
 
-
     # print('npos num:', npos)
     fp = np.cumsum(fp)
     tp = np.cumsum(tp)
@@ -229,9 +232,11 @@ def voc_eval(detpath,
 
     return rec, prec, ap
 
+
 def main():
     detpath = r'PATH_TO_BE_CONFIGURED/Task1_{:s}.txt'
-    annopath = r'PATH_TO_BE_CONFIGURED/{:s}.txt' # change the directory to the path of val/labelTxt, if you want to do evaluation on the valset
+    # change the directory to the path of val/labelTxt, if you want to do evaluation on the valset
+    annopath = r'PATH_TO_BE_CONFIGURED/{:s}.txt'
     imagesetfile = r'PATH_TO_BE_CONFIGURED/test.txt'
     classnames = ['ship']
     classaps = []
@@ -259,6 +264,7 @@ def main():
     print('map:', map)
     classaps = 100*np.array(classaps)
     print('classaps: ', classaps)
+
 
 if __name__ == '__main__':
     main()

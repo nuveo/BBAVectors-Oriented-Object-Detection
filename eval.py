@@ -6,23 +6,26 @@ import func_utils
 class EvalModule(object):
     def __init__(self, dataset, num_classes, model, decoder):
         torch.manual_seed(317)
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu")
         self.dataset = dataset
         self.num_classes = num_classes
         self.model = model
         self.decoder = decoder
 
-
     def load_model(self, model, resume):
-        checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
-        print('loaded weights from {}, epoch {}'.format(resume, checkpoint['epoch']))
+        checkpoint = torch.load(
+            resume, map_location=lambda storage, loc: storage)
+        print('loaded weights from {}, epoch {}'.format(
+            resume, checkpoint['epoch']))
         state_dict_ = checkpoint['model_state_dict']
         model.load_state_dict(state_dict_, strict=False)
         return model
 
     def evaluation(self, args, down_ratio):
         save_path = 'weights_'+args.dataset
-        self.model = self.load_model(self.model, os.path.join(save_path, args.resume))
+        self.model = self.load_model(
+            self.model, os.path.join(save_path, args.resume))
         self.model = self.model.to(self.device)
         self.model.eval()
 
@@ -46,7 +49,7 @@ class EvalModule(object):
                                  result_path,
                                  print_ps=True)
 
-        if args.dataset == 'dota':
+        if args.dataset == 'dota' or args.dataset == 'custom':
             merge_path = 'merge_'+args.dataset
             if not os.path.exists(merge_path):
                 os.mkdir(merge_path)
