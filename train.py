@@ -87,7 +87,7 @@ class TrainModule(object):
             self.model.parameters(), args.init_lr)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
             self.optimizer, gamma=0.96, last_epoch=-1)
-        save_path = 'weights_'+args.dataset
+        save_path = 'weights'
         start_epoch = 1
 
         # add resume part for continuing training when break previously, 10-16-2020
@@ -188,7 +188,7 @@ class TrainModule(object):
         return epoch_loss
 
     def dec_eval(self, args, dsets):
-        result_path = 'result_'+args.dataset
+        result_path = 'result'
         if not os.path.exists(result_path):
             os.mkdir(result_path)
 

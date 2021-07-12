@@ -82,7 +82,7 @@ class TestModule(object):
         plt.savefig('heatmap.png')
 
     def test(self, args, down_ratio):
-        save_path = 'weights_'+args.dataset
+        save_path = 'weights'
         self.model = self.load_model(
             self.model, os.path.join(save_path, args.resume))
         self.model = self.model.to(self.device)

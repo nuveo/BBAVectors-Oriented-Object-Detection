@@ -1,0 +1,11 @@
+merge/
+weights/
+result/
+data/
+
+*.sh
+*.so
+**/.idea/
+*pyc
+__pycache__/
+.ipynb_checkpoints/

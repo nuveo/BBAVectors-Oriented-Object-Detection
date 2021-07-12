@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--resume', type=str, default='model_50.pth',
                         help='Weights resumed in testing and evaluation')
     parser.add_argument('--dataset', type=str,
-                        default='dota', help='Name of dataset')
+                        default='custom', help='Name of dataset')
     parser.add_argument('--data_dir', type=str,
                         default='../Datasets/dota', help='Data directory')
     parser.add_argument('--phase', type=str, default='test',
