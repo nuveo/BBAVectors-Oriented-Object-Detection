@@ -2,6 +2,7 @@ merge/
 weights/
 result/
 data/
+restored/
 
 *.sh
 *.so

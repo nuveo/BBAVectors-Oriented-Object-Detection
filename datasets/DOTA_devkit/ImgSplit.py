@@ -255,7 +255,7 @@ class splitbase():
 
 if __name__ == '__main__':
     # example usage of ImgSplit
-    split = splitbase(r'/home/guilherme/Documents/Code/Nuveo/BBAVectors-Oriented-Object-Detection/data',
+    split = splitbase(r'/home/guilherme/Documents/Code/Nuveo/BBAVectors-Oriented-Object-Detection/data2',
                       r'/home/guilherme/Documents/Code/Nuveo/BBAVectors-Oriented-Object-Detection/datasplit',
-                      subsize=768, gap=384)
+                      subsize=768, gap=384, ext='.jpg')
     split.splitdata(1)
