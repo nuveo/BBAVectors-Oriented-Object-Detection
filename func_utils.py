@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 import numpy as np
 from datasets.DOTA_devkit.ResultMerge_multi_process import py_cpu_nms_poly_fast, py_cpu_nms_poly
@@ -54,8 +55,11 @@ def write_results(args,
                   decoder,
                   result_path,
                   print_ps=False):
-    results = {cat: {img_id: [] for img_id in dsets.img_ids} for cat in dsets.category}
+    results = {cat: {img_id: [] for img_id in dsets.img_ids}
+               for cat in dsets.category}
+    times = []
     for index in range(len(dsets)):
+        init_time = time.time()
         data_dict = dsets.__getitem__(index)
         image = data_dict['image'].to(device)
         img_id = data_dict['img_id']
@@ -65,12 +69,12 @@ def write_results(args,
         with torch.no_grad():
             pr_decs = model(image)
 
-
         decoded_pts = []
         decoded_scores = []
-        torch.cuda.synchronize(device)
+        torch.cuda.synchronize()
         predictions = decoder.ctdet_decode(pr_decs)
-        pts0, scores0 = decode_prediction(predictions, dsets, args, img_id, down_ratio)
+        pts0, scores0 = decode_prediction(
+            predictions, dsets, args, img_id, down_ratio)
         decoded_pts.append(pts0)
         decoded_scores.append(scores0)
 
@@ -89,7 +93,11 @@ def write_results(args,
                 nms_results = non_maximum_suppression(pts_cat, scores_cat)
                 results[cat][img_id].extend(nms_results)
         if print_ps:
-            print('testing {}/{} data {}'.format(index+1, len(dsets), img_id))
+            times.append(time.time() - init_time)
+            print('[%d/%d] testing data: %s - Time elapsed: %.4f' % (
+                index+1, len(dsets), img_id, times[-1]))
+
+    print("Average time: %.4f" % (np.mean(times)))
 
     for cat in dsets.category:
         if cat == 'background':
