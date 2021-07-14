@@ -1,9 +1,14 @@
 merge/
 weights/
 result/
-data/
 restored/
+build/
+data/
+datasplit/
+example/
+examplesplit/
 
+*.egg-info/
 *.sh
 *.so
 **/.idea/
