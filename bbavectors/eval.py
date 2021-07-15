@@ -24,14 +24,14 @@ class EvalModule(object):
         return model
 
     def evaluation(self, args, down_ratio):
-        save_path = os.path.join(ROOT, 'weights')
+        save_path = os.path.join(ROOT, 'work_dir/weights')
         self.model = self.load_model(
             self.model, os.path.join(save_path, args.resume)
         )
         self.model = self.model.to(self.device)
         self.model.eval()
 
-        result_path = os.path.join(ROOT, 'result')
+        result_path = os.path.join(ROOT, 'work_dir/result')
         if not os.path.exists(result_path):
             os.mkdir(result_path)
 
@@ -52,7 +52,7 @@ class EvalModule(object):
                                  print_ps=True)
 
         if args.dataset == 'dota' or args.dataset == 'custom':
-            merge_path = 'merge'
+            merge_path = os.path.join(ROOT, 'work_dir/merge')
             if not os.path.exists(merge_path):
                 os.mkdir(merge_path)
             dsets.merge_crop_image_results(result_path, merge_path)

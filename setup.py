@@ -11,7 +11,8 @@ requirements = [
     'torchvision',
     'opencv-python==4.5.3.56',
     'Shapely==1.7.1',
-    'matplotlib==3.0.3'
+    'matplotlib==3.0.3',
+    'yacs==0.1.8'
 ]
 
 polyiou_module = Extension(

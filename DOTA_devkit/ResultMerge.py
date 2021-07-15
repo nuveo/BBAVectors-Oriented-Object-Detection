@@ -6,9 +6,9 @@
 """
 import os
 import numpy as np
-import dota_utils as util
 import re
 import time
+from . import dota_utils as util
 from DOTA_devkit import polyiou
 
 # the thresh for nms when merge image

@@ -4,7 +4,8 @@ import cv2
 import time
 import os
 import matplotlib.pyplot as plt
-import func_utils
+from bbavectors import ROOT
+from . import func_utils
 
 
 def apply_mask(image, mask, alpha=0.5):
@@ -82,7 +83,7 @@ class TestModule(object):
         plt.savefig('heatmap.png')
 
     def test(self, args, down_ratio):
-        save_path = 'weights'
+        save_path = os.path.join(ROOT, 'work_dir/weights')
         self.model = self.load_model(
             self.model, os.path.join(save_path, args.resume))
         self.model = self.model.to(self.device)

@@ -6,8 +6,8 @@ from bbavectors import ROOT
 from datasets.dataset_dota import DOTA
 from datasets.dataset_hrsc import HRSC
 from datasets.dataset_custom import CUSTOM
-from models import ctrbox_net
-from decoder import DecDecoder
+from bbavectors.models import ctrbox_net
+from bbavectors.decoder import DecDecoder
 
 
 def parse_args():

@@ -122,7 +122,8 @@ class BaseDataset(data.Dataset):
     def __len__(self):
         return len(self.img_ids)
 
-    def processing_test(self, image, input_h, input_w):
+    @staticmethod
+    def processing_test(image, input_h, input_w):
         image = cv2.resize(image, (input_w, input_h))
         out_image = image.astype(np.float32) / 255.
         out_image = out_image - 0.5

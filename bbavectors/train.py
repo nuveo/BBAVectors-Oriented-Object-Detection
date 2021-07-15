@@ -5,7 +5,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import loss
-import func_utils
+from . import func_utils
+from bbavectors import ROOT
 
 
 def collater(data):
@@ -88,7 +89,7 @@ class TrainModule(object):
             self.model.parameters(), args.init_lr)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
             self.optimizer, gamma=0.96, last_epoch=-1)
-        save_path = 'weights'
+        save_path = os.path.join(ROOT, 'work_dir/weights')
         start_epoch = 1
 
         # add resume part for continuing training when break previously, 10-16-2020
@@ -100,7 +101,7 @@ class TrainModule(object):
         # end
 
         if not os.path.exists(save_path):
-            os.mkdir(save_path)
+            os.makedirs(save_path)
         if args.ngpus > 1:
             if torch.cuda.device_count() > 1:
                 print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -189,7 +190,7 @@ class TrainModule(object):
         return epoch_loss
 
     def dec_eval(self, args, dsets):
-        result_path = 'result'
+        result_path = os.path.join(ROOT, 'work_dir/result')
         if not os.path.exists(result_path):
             os.mkdir(result_path)
 
