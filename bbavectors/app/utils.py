@@ -1,9 +1,15 @@
 import os
+import cv2
+import glob
 import torch
+import shutil
 import numpy as np
-from bbavectors.configs import cfg, load_config
+from bbavectors import WORK_DIR, TEMP_DIR
 from bbavectors.models import ctrbox_net
 from bbavectors.decoder import DecDecoder
+from DOTA_devkit.dota_utils import Task2groundtruth_poly
+from DOTA_devkit.SplitOnlyImage import splitbase
+from DOTA_devkit.ResultMerge_multi_process import mergebypoly
 
 
 def decode_prediction(orig_shape, predictions, cfg):
@@ -67,3 +73,106 @@ def load_model(model_dir, cfg, device):
     model = model.to(device)
     model.eval()
     return model, decoder
+
+
+def clear_temp_folder():
+    if os.path.exists(TEMP_DIR):
+        shutil.rmtree(TEMP_DIR)
+    os.makedirs(TEMP_DIR)
+
+
+def generate_splits(image, rate=1.0):
+    clear_temp_folder()
+    IMAGE_DIR = os.path.join(TEMP_DIR, 'image')
+    SPLIT_DIR = os.path.join(TEMP_DIR, 'split')
+    IMAGE_PATH = os.path.join(IMAGE_DIR, 'test_image.jpg')
+    os.makedirs(IMAGE_DIR)
+    os.makedirs(SPLIT_DIR)
+    cv2.imwrite(IMAGE_PATH, image)
+
+    # Split all images
+    split = splitbase(
+        IMAGE_DIR, SPLIT_DIR,
+        subsize=768, gap=384, ext='.jpg'
+    )
+
+    # Resize image before cut
+    split.splitdata(rate=rate)
+
+    # Get paths
+    image_paths = glob.glob(os.path.join(SPLIT_DIR, '*'))
+
+    return image_paths
+
+
+def postprocess_results(results):
+    RESULT_DIR = os.path.join(TEMP_DIR, 'results')
+    MERGE_DIR = os.path.join(TEMP_DIR, 'merge')
+    RESTORED_DIR = os.path.join(TEMP_DIR, 'restored')
+    os.makedirs(RESULT_DIR)
+    os.makedirs(MERGE_DIR)
+    os.makedirs(RESTORED_DIR)
+
+    # Save model results
+    for cat in results.keys():
+        if cat == 'background':
+            continue
+        with open(os.path.join(RESULT_DIR, 'Task1_{}.txt'.format(cat)), 'w') as f:
+            for img_id in results[cat]:
+                for pt in results[cat][img_id]:
+                    f.write('{} {:.12f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(
+                        img_id, pt[8], pt[0], pt[1], pt[2], pt[3], pt[4], pt[5], pt[6], pt[7]))
+
+    # Merge polygons
+    mergebypoly(RESULT_DIR, MERGE_DIR)
+
+    # Format results
+    data = Task2groundtruth_poly(MERGE_DIR, RESTORED_DIR)
+
+    return data
+
+
+def plot_results(orig_image, results, image_id):
+    for cat in results.keys():
+        if cat == 'background':
+            continue
+
+        result = results[cat][image_id]
+        for pred in result:
+            score = pred[-1]
+            tl = np.asarray([pred[0], pred[1]], np.float32)
+            tr = np.asarray([pred[2], pred[3]], np.float32)
+            br = np.asarray([pred[4], pred[5]], np.float32)
+            bl = np.asarray([pred[6], pred[7]], np.float32)
+
+            tt = (np.asarray(tl, np.float32) +
+                  np.asarray(tr, np.float32)) / 2
+            rr = (np.asarray(tr, np.float32) +
+                  np.asarray(br, np.float32)) / 2
+            bb = (np.asarray(bl, np.float32) +
+                  np.asarray(br, np.float32)) / 2
+            ll = (np.asarray(tl, np.float32) +
+                  np.asarray(bl, np.float32)) / 2
+
+            box = np.asarray([tl, tr, br, bl], np.float32)
+            cen_pts = np.mean(box, axis=0)
+            cv2.line(orig_image, (int(cen_pts[0]), int(cen_pts[1])), (int(
+                tt[0]), int(tt[1])), (0, 0, 255), 1, 1)
+            cv2.line(orig_image, (int(cen_pts[0]), int(cen_pts[1])), (int(
+                rr[0]), int(rr[1])), (255, 0, 255), 1, 1)
+            cv2.line(orig_image, (int(cen_pts[0]), int(cen_pts[1])), (int(
+                bb[0]), int(bb[1])), (0, 255, 0), 1, 1)
+            cv2.line(orig_image, (int(cen_pts[0]), int(cen_pts[1])), (int(
+                ll[0]), int(ll[1])), (255, 0, 0), 1, 1)
+
+            orig_image = cv2.drawContours(
+                orig_image, [np.int0(box)], -1, (255, 0, 255), 1, 1)
+
+            cv2.putText(orig_image, '{:.2f} {}'.format(score, cat), (int(box[1][0]), int(box[1][1])),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 255), 1, 1)
+
+    cv2.imshow('pr_image', orig_image)
+    k = cv2.waitKey(0) & 0xFF
+    if k == ord('q'):
+        cv2.destroyAllWindows()
+        exit()

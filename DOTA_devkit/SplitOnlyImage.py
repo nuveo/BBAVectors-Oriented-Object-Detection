@@ -50,7 +50,7 @@ class splitbase():
                 if (up + self.subsize >= height):
                     up = max(height - self.subsize, 0)
                 subimgname = outbasename + str(left) + '___' + str(up)
-                self.saveimagepatches(resizeimg, subimgname, left, up)
+                self.saveimagepatches(resizeimg, subimgname, left, up, extent)
                 if (up + self.subsize >= height):
                     break
                 else:

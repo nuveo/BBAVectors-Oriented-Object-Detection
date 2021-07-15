@@ -182,6 +182,7 @@ def groundtruth2Task1(srcpath, dstpath):
 
 
 def Task2groundtruth_poly(srcpath, dstpath):
+    data = []
     thresh = 0.1
     filedict = {}
     Tasklist = GetFileFromThisRootDir(srcpath, '.txt')
@@ -191,30 +192,30 @@ def Task2groundtruth_poly(srcpath, dstpath):
 
     for Taskfile in Tasklist:
         idname = custombasename(Taskfile).split('_')[-1]
-        # idname = datamap_inverse[idname]
         f = open(Taskfile, 'r')
         lines = f.readlines()
         for line in lines:
             if len(line) == 0:
                 continue
-            # print('line:', line)
             splitline = line.strip().split(' ')
             filename = splitline[0]
             confidence = splitline[1]
             bbox = splitline[2:]
             if float(confidence) > thresh:
                 if filename not in filedict:
-                    # filedict[filename] = codecs.open(os.path.join(dstpath, filename + '.txt'), 'w', 'utf_16')
                     filedict[filename] = codecs.open(
                         os.path.join(dstpath, filename + '.txt'), 'w')
-                # poly = util.dots2ToRec8(bbox)
                 poly = bbox
-                #               filedict[filename].write(' '.join(poly) + ' ' + idname + '_' + str(round(float(confidence), 2)) + '\n')
-            # print('idname:', idname)
-
-            # filedict[filename].write(' '.join(poly) + ' ' + idname + '_' + str(round(float(confidence), 2)) + '\n')
-
                 filedict[filename].write(' '.join(poly) + ' ' + idname + '\n')
+
+            poly = list(map(round, map(float, poly)))
+            poly = list(zip(poly[0::2], poly[1::2]))
+            data.append({
+                "label": idname,
+                "polygon": poly
+            })
+
+    return data
 
 
 def polygonToRotRectangle(bbox):

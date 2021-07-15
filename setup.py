@@ -12,7 +12,8 @@ requirements = [
     'opencv-python==4.5.3.56',
     'Shapely==1.7.1',
     'matplotlib==3.0.3',
-    'yacs==0.1.8'
+    'yacs==0.1.8',
+    'tqdm==4.61.2'
 ]
 
 polyiou_module = Extension(

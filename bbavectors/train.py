@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import loss
 from . import func_utils
-from bbavectors import ROOT
+from bbavectors import WORK_DIR
 
 
 def collater(data):
@@ -89,7 +89,7 @@ class TrainModule(object):
             self.model.parameters(), args.init_lr)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
             self.optimizer, gamma=0.96, last_epoch=-1)
-        save_path = os.path.join(ROOT, 'work_dir/weights')
+        save_path = os.path.join(WORK_DIR, 'weights')
         start_epoch = 1
 
         # add resume part for continuing training when break previously, 10-16-2020
@@ -190,7 +190,7 @@ class TrainModule(object):
         return epoch_loss
 
     def dec_eval(self, args, dsets):
-        result_path = os.path.join(ROOT, 'work_dir/result')
+        result_path = os.path.join(WORK_DIR, 'result')
         if not os.path.exists(result_path):
             os.mkdir(result_path)
 
