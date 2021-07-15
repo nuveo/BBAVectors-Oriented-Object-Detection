@@ -81,7 +81,7 @@ def clear_temp_folder():
     os.makedirs(TEMP_DIR)
 
 
-def generate_splits(image, rate=1.0):
+def generate_splits(image, altitude, cfg):
     clear_temp_folder()
     IMAGE_DIR = os.path.join(TEMP_DIR, 'image')
     SPLIT_DIR = os.path.join(TEMP_DIR, 'split')
@@ -89,6 +89,12 @@ def generate_splits(image, rate=1.0):
     os.makedirs(IMAGE_DIR)
     os.makedirs(SPLIT_DIR)
     cv2.imwrite(IMAGE_PATH, image)
+
+    # Compute rate
+    rate = cfg.RESIZE_RATE
+    orig_altitude = cfg.PHOTO_ALTITUDE
+    rate = rate * altitude / orig_altitude
+    print("Resize rate: %.4f" % (rate))
 
     # Split all images
     split = splitbase(

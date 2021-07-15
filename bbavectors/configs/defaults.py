@@ -22,6 +22,12 @@ _C.CONF_THRESH = 0.18
 # List of all categories that the model can predict.
 _C.CATEGORIES = []
 
+# Image resize rate.
+_C.RESIZE_RATE = 1.0
+
+# Altitude the photo was taken in meters.
+_C.PHOTO_ALTITUDE = 120
+
 
 def export_config(path):
     """Export config to a yaml file."""

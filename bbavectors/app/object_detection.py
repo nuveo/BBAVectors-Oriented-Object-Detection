@@ -26,7 +26,7 @@ class ObjectDetection:
         self.model, self.decoder = load_model(
             model_dir, self.cfg, self.device)
 
-    def predict(self, orig_image, plot=False):
+    def predict(self, orig_image, altitude, plot=False):
         init_time = time.time()
         categories = self.cfg.CATEGORIES
         results = {cat: defaultdict(list) for cat in categories}
@@ -34,8 +34,8 @@ class ObjectDetection:
         if orig_image is None:
             return results
 
-        print("Generate image splits.")
-        image_paths = generate_splits(orig_image)
+        print("Generating image splits. This may take a while.")
+        image_paths = generate_splits(orig_image, altitude, self.cfg)
         del orig_image
 
         print("Start inference.")
@@ -93,11 +93,11 @@ class ObjectDetection:
 
 
 if __name__ == "__main__":
-    model_path = ''
+    model_path = '/home/guilherme/Documents/Code/Nuveo/BBAVectors-Oriented-Object-Detection/bbavectors/work_dir/weights'
     model = ObjectDetection(model_path)
 
-    img_path = ''
+    img_path = '/home/guilherme/Documents/Code/Nuveo/datasets/der/images/test20m.jpg'
     img = cv2.imread(img_path)
 
-    anns = model.predict(img, plot=True)
+    anns = model.predict(img, altitude=20, plot=True)
     print(anns)
