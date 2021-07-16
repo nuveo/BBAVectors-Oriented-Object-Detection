@@ -201,8 +201,11 @@ def plot_results(orig_image, results, image_id):
             cv2.putText(orig_image, '{:.2f} {}'.format(score, cat), (int(box[1][0]), int(box[1][1])),
                         cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 255), 1, 1)
 
-    cv2.imshow('pr_image', orig_image)
-    k = cv2.waitKey(0) & 0xFF
-    if k == ord('q'):
-        cv2.destroyAllWindows()
-        exit()
+    try:
+        cv2.imshow('pr_image', orig_image)
+        k = cv2.waitKey(0) & 0xFF
+        if k == ord('q'):
+            cv2.destroyAllWindows()
+            exit()
+    except:
+        cv2.imwrite(os.path.join('/results', image_id + ".jpg"), orig_image)

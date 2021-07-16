@@ -1,6 +1,7 @@
 import os
 import sys
 import cv2
+import json
 import time
 import torch
 import argparse
@@ -113,4 +114,10 @@ if __name__ == "__main__":
 
     anns = model.predict(
         img, altitude=args.altitude, plot=args.plot)
-    print(anns)
+
+    print("Saving results...")
+    result_path = args.image.rsplit(".", 1)[0] + ".json"
+    with open(result_path, 'w') as fp:
+        json.dump({"annotations": anns}, fp)
+
+    print("Finished!")

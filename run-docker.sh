@@ -13,9 +13,10 @@ drone_altitude=$3
 docker run --rm -it --gpus=all \
 	-v "$image_dir":/image_dir/ \
 	-v "$weights_dir":/weights_dir/ \
+	-v "results":/results/ \
 	bbavectors \
 	python ./bbavectors/app/object_detection.py \
 		--model_dir /weights_dir/"$weight_dir" \
 		--image /image_dir/"$image_name" \
-		--altitude $drone_altitude
+		--altitude $drone_altitude --plot
 
