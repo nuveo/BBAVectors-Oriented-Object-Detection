@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 from bbavectors import __version__
-from distutils.core import setup, Extension
+from distutils.core import setup
 
 long_description = open('README.md').read()
 
@@ -16,14 +16,6 @@ requirements = [
     'tqdm==4.61.2'
 ]
 
-polyiou_module = Extension(
-    '_polyiou',
-    sources=[
-        'DOTA_devkit/polyiou_wrap.cxx',
-        'DOTA_devkit/polyiou.cpp'
-    ],
-)
-
 setup(
     # Metadata
     name='bbavectors',
@@ -37,7 +29,5 @@ setup(
     packages=['bbavectors', 'DOTA_devkit'],
     zip_safe=True,
     include_package_data=True,
-    install_requires=requirements,
-    ext_modules=[polyiou_module],
-    py_modules=['polyiou']
+    install_requires=requirements
 )

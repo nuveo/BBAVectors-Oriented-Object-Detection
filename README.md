@@ -35,6 +35,7 @@ Install the [DOTA development kit](/datasets/DOTA_devkit/README.md) and the BBA 
     cd $PROJECT_FOLDER/DOTA_devkit
     sudo apt-get install swig
     swig -c++ -python polyiou.i
+    python setup.py build_ext --inplace
 ```
 3. install the project modules
 ```bash
