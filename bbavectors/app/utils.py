@@ -53,7 +53,7 @@ def load_model(model_dir, cfg, device):
     }
     model = ctrbox_net.CTRBOX(
         heads=heads,
-        pretrained=True,
+        pretrained=False,
         down_ratio=4,
         final_kernel=1,
         head_conv=256

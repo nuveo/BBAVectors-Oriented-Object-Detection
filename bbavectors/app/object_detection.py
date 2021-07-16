@@ -58,7 +58,6 @@ class ObjectDetection:
             # Decode
             decoded_pts = []
             decoded_scores = []
-            torch.cuda.synchronize()
             predictions = self.decoder.ctdet_decode(pr_decs)
             pts0, scores0 = decode_prediction(
                 image_split.shape, predictions, self.cfg)
