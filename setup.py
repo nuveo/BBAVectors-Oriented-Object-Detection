@@ -13,7 +13,7 @@ requirements = [
     'Shapely==1.7.1',
     'matplotlib==3.0.3',
     'yacs==0.1.8',
-    'tqdm==4.61.2'
+    'tqdm>=4.46.0'
 ]
 
 setup(
