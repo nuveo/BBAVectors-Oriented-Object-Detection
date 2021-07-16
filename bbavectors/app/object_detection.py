@@ -93,11 +93,12 @@ class ObjectDetection:
 
 
 if __name__ == "__main__":
-    model_path = '/home/guilherme/Documents/Code/Nuveo/BBAVectors-Oriented-Object-Detection/bbavectors/work_dir/weights'
+    model_path = ''
     model = ObjectDetection(model_path)
 
-    img_path = '/home/guilherme/Documents/Code/Nuveo/datasets/der/images/test20m.jpg'
+    img_path = ''
     img = cv2.imread(img_path)
 
-    anns = model.predict(img, altitude=20, plot=True)
+    anns = model.predict(img, altitude=45, plot=True)
+
     print(anns)

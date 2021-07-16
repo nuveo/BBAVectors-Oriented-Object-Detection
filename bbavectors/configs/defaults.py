@@ -28,6 +28,9 @@ _C.RESIZE_RATE = 1.0
 # Altitude the photo was taken in meters.
 _C.PHOTO_ALTITUDE = 120
 
+# Resolution references in cm/px for different altitudes.
+_C.RESOLUTION = []
+
 
 def export_config(path):
     """Export config to a yaml file."""
