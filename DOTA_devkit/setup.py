@@ -2,7 +2,6 @@
     setup.py file for SWIG example
 """
 from distutils.core import setup, Extension
-import numpy
 
 polyiou_module = Extension('_polyiou',
                            sources=['polyiou_wrap.cxx', 'polyiou.cpp'],
