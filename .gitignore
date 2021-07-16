@@ -10,7 +10,6 @@ examplesplit/
 work_dir/
 
 *.egg-info/
-*.sh
 *.so
 **/.idea/
 *pyc

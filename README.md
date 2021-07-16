@@ -112,3 +112,17 @@ python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 16 --dataset d
 You may change `conf_thresh` to get a better `mAP`. 
 
 Please zip and upload the generated `merge_dota` for DOTA [Task1](https://captain-whu.github.io/DOTA/evaluation.html) evaluation.
+
+
+## Docker
+### Building image
+```bash
+docker build -t "bbavectors" .
+```
+
+### Testing
+```bash
+bash run-docker.sh <model-dir> <image-path> <drone-altitude>  
+
+Ex: bash run-docker.sh /home/docs/model_weights/ /home/docs/image-test.jpg 45
+```
