@@ -208,4 +208,4 @@ def plot_results(orig_image, results, image_id):
             cv2.destroyAllWindows()
             exit()
     except:
-        cv2.imwrite(os.path.join('/results', image_id + ".jpg"), orig_image)
+        cv2.imwrite(os.path.join('/results', image_id), orig_image)
