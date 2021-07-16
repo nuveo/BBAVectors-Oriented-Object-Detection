@@ -3,6 +3,7 @@ import sys
 import cv2
 import time
 import torch
+import argparse
 import numpy as np
 from collections import defaultdict
 from tqdm import tqdm
@@ -93,14 +94,24 @@ class ObjectDetection:
         return results
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='BBAVectors')
+    parser.add_argument('--model_dir', required=True,
+                        type=str, help='Model weights directory.')
+    parser.add_argument('--image', required=True,
+                        type=str, help='Full image path.')
+    parser.add_argument('--altitude', default=120,
+                        type=int, help='Drone photo altitude in meters.')
+    parser.add_argument('--plot', default=False, action='store_true')
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    print(sys.argv)
-    assert len(sys.argv) == 3
-    model_path = sys.argv[1]
-    image_path = sys.argv[2]
+    args = parse_args()
 
-    model = ObjectDetection(model_path)
-    img = cv2.imread(image_path)
+    model = ObjectDetection(args.model_dir)
+    img = cv2.imread(args.image)
 
-    anns = model.predict(img, altitude=20, plot=True)
+    anns = model.predict(
+        img, altitude=args.altitude, plot=args.plot)
     print(anns)
