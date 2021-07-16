@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import time
 import torch
@@ -93,12 +94,13 @@ class ObjectDetection:
 
 
 if __name__ == "__main__":
-    model_path = ''
+    print(sys.argv)
+    assert len(sys.argv) == 3
+    model_path = sys.argv[1]
+    image_path = sys.argv[2]
+
     model = ObjectDetection(model_path)
+    img = cv2.imread(image_path)
 
-    img_path = ''
-    img = cv2.imread(img_path)
-
-    anns = model.predict(img, altitude=45, plot=True)
-
+    anns = model.predict(img, altitude=20, plot=True)
     print(anns)
