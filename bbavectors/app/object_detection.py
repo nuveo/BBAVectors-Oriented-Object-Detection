@@ -1,7 +1,5 @@
 import os
-import sys
 import cv2
-import json
 import time
 import torch
 import argparse
@@ -16,8 +14,8 @@ from bbavectors.app.utils import (
     load_model,
     generate_splits,
     postprocess_results,
-    clear_temp_folder,
-    plot_results
+    plot_crop_results,
+    save_results
 )
 
 
@@ -29,13 +27,14 @@ class ObjectDetection:
         self.model, self.decoder = load_model(
             model_dir, self.cfg, self.device)
 
-    def predict(self, orig_image, altitude, plot=False):
+    def predict(self, image_path, altitude, plot=False):
         init_time = time.time()
         categories = self.cfg.CATEGORIES
         results = {cat: defaultdict(list) for cat in categories}
 
+        orig_image = cv2.imread(image_path)
         if orig_image is None:
-            return results
+            return None
 
         print("Generating image splits. This may take a while.")
         image_paths = generate_splits(orig_image, altitude, self.cfg)
@@ -82,14 +81,12 @@ class ObjectDetection:
                     results[cat][image_id].extend(nms_results)
 
             if plot:
-                plot_results(image_split, results, image_id)
+                plot_crop_results(image_split, results, image_id)
 
         results = postprocess_results(results)
 
         print('Total inference time: %.4f' %
               (time.time() - init_time))
-
-        clear_temp_folder()
 
         return results
 
@@ -110,14 +107,10 @@ if __name__ == "__main__":
     args = parse_args()
 
     model = ObjectDetection(args.model_dir)
-    img = cv2.imread(args.image)
 
-    anns = model.predict(
-        img, altitude=args.altitude, plot=args.plot)
+    preds = model.predict(
+        args.image, altitude=args.altitude, plot=args.plot)
 
-    print("Saving results...")
-    result_path = args.image.rsplit(".", 1)[0] + ".json"
-    with open(result_path, 'w') as fp:
-        json.dump({"annotations": anns}, fp)
+    save_results(args.image, preds)
 
     print("Finished!")
