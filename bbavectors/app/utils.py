@@ -220,7 +220,7 @@ def plot_crop_results(orig_image, results, image_id):
 def plot_full_image(objects, img_path, output_path):
     img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
 
-    plt.figure(figsize=(30, 30))
+    plt.figure(figsize=(40, 40))
     plt.imshow(img)
     plt.axis('off')
     ax = plt.gca()
