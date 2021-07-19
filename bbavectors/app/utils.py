@@ -1,10 +1,14 @@
 import os
 import cv2
+import json
 import glob
 import torch
 import shutil
 import bisect
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon
 from bbavectors import WORK_DIR, TEMP_DIR
 from bbavectors.models import ctrbox_net
 from bbavectors.decoder import DecDecoder
@@ -107,8 +111,8 @@ def generate_splits(image, altitude, cfg):
     IMAGE_DIR = os.path.join(TEMP_DIR, 'image')
     SPLIT_DIR = os.path.join(TEMP_DIR, 'split')
     IMAGE_PATH = os.path.join(IMAGE_DIR, 'test_image.jpg')
-    os.makedirs(IMAGE_DIR)
-    os.makedirs(SPLIT_DIR)
+    os.makedirs(IMAGE_DIR, exist_ok=True)
+    os.makedirs(SPLIT_DIR, exist_ok=True)
     cv2.imwrite(IMAGE_PATH, image)
 
     # Compute rate
@@ -139,9 +143,9 @@ def postprocess_results(results):
     RESULT_DIR = os.path.join(TEMP_DIR, 'results')
     MERGE_DIR = os.path.join(TEMP_DIR, 'merge')
     RESTORED_DIR = os.path.join(TEMP_DIR, 'restored')
-    os.makedirs(RESULT_DIR)
-    os.makedirs(MERGE_DIR)
-    os.makedirs(RESTORED_DIR)
+    os.makedirs(RESULT_DIR, exist_ok=True)
+    os.makedirs(MERGE_DIR, exist_ok=True)
+    os.makedirs(RESTORED_DIR, exist_ok=True)
 
     # Save model results
     for cat in results.keys():
@@ -162,7 +166,7 @@ def postprocess_results(results):
     return data
 
 
-def plot_results(orig_image, results, image_id):
+def plot_crop_results(orig_image, results, image_id):
     for cat in results.keys():
         if cat == 'background':
             continue
@@ -208,4 +212,59 @@ def plot_results(orig_image, results, image_id):
             cv2.destroyAllWindows()
             exit()
     except:
-        cv2.imwrite(os.path.join('/results', image_id), orig_image)
+        results_folder = os.path.join(WORK_DIR, 'results/detections_by_crop')
+        os.makedirs(results_folder, exist_ok=True)
+        cv2.imwrite(os.path.join(results_folder, image_id), orig_image)
+
+
+def plot_full_image(objects, img_path, output_path):
+    img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+
+    plt.figure(figsize=(30, 30))
+    plt.imshow(img)
+    plt.axis('off')
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+    polygons = []
+    color = []
+    for obj in objects:
+        c = (np.random.random((1, 3)) * 0.6 + 0.4).tolist()[0]
+        poly = obj['polygon']
+        polygons.append(Polygon(poly))
+        color.append(c)
+    p = PatchCollection(polygons, facecolors=color,
+                        linewidths=0, alpha=0.4)
+    ax.add_collection(p)
+    p = PatchCollection(polygons, facecolors='none',
+                        edgecolors=color, linewidths=2)
+    ax.add_collection(p)
+
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+
+
+def save_results(image_path, results):
+    print("Saving results...")
+    results_dir = os.path.dirname(image_path)
+    image_id = os.path.basename(image_path).rsplit(".", 1)[0]
+
+    count = {}
+
+    print("\nLABELS COUNT:")
+    print("--------------------")
+    labels = np.array([r['label'] for r in results])
+    for label in np.unique(labels):
+        count[label] = int(np.sum(labels == label))
+        print("%s - %d" % (label, count[label]))
+    print("--------------------\n")
+
+    data = {
+        "annotations": results,
+        "labels_count": count
+    }
+
+    output_path = os.path.join(results_dir, image_id + "_detections.jpg")
+    plot_full_image(results, image_path, output_path)
+
+    json_path = os.path.join(results_dir, image_id + '.json')
+    with open(json_path, 'w') as fp:
+        json.dump(data, fp)
