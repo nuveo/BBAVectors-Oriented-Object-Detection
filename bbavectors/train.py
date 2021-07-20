@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import loss
+from tqdm import tqdm
 from . import func_utils
 from bbavectors import WORK_DIR
 
@@ -132,6 +133,7 @@ class TrainModule(object):
 
         print('Starting training...')
         train_loss = []
+        best_loss = np.inf
         ap_list = []
         for epoch in range(start_epoch, args.num_epoch+1):
             print('-'*10)
@@ -145,8 +147,9 @@ class TrainModule(object):
             np.savetxt(os.path.join(save_path, 'train_loss.txt'),
                        train_loss, fmt='%.6f')
 
-            if epoch % 5 == 0 or epoch > 20:
-                self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
+            if epoch_loss < best_loss:
+                best_loss = epoch_loss
+                self.save_model(os.path.join(save_path, 'model_best.pth'),
                                 epoch,
                                 self.model,
                                 self.optimizer)
@@ -168,7 +171,7 @@ class TrainModule(object):
         else:
             self.model.eval()
         running_loss = 0.
-        for data_dict in data_loader:
+        for data_dict in tqdm(data_loader):
             for name in data_dict:
                 data_dict[name] = data_dict[name].to(
                     device=self.device, non_blocking=True)

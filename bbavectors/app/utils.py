@@ -210,7 +210,7 @@ def plot_crop_results(orig_image, results, image_id):
         k = cv2.waitKey(0) & 0xFF
         if k == ord('q'):
             cv2.destroyAllWindows()
-            exit()
+            exit(1)
     except:
         results_folder = os.path.join(WORK_DIR, 'results/detections_by_crop')
         os.makedirs(results_folder, exist_ok=True)
@@ -236,7 +236,7 @@ def plot_full_image(objects, img_path, output_path):
                         linewidths=0, alpha=0.4)
     ax.add_collection(p)
     p = PatchCollection(polygons, facecolors='none',
-                        edgecolors=color, linewidths=2)
+                        edgecolors=color, linewidths=1)
     ax.add_collection(p)
 
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
