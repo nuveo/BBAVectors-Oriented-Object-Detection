@@ -24,6 +24,14 @@ class splitbase():
     def saveimagepatches(self, img, subimgname, left, up, ext='.png'):
         subimg = copy.deepcopy(
             img[up: (up + self.subsize), left: (left + self.subsize)])
+
+        if subimg.shape[0] < self.subsize or subimg.shape[1] < self.subsize:
+            shape = np.array(img.shape)
+            shape[:2] = self.subsize
+            tmpimg = np.zeros(shape)
+            tmpimg[:subimg.shape[0], :subimg.shape[1]] = subimg[:, :]
+            subimg = tmpimg
+
         outdir = os.path.join(self.dstpath, subimgname + ext)
         cv2.imwrite(outdir, subimg)
 
