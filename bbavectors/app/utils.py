@@ -125,9 +125,11 @@ def generate_splits(image, altitude, cfg):
     print("Resize rate: %.4f" % (rate))
 
     # Split all images
+    subsize = int(cfg.INPUT_SHAPE[0])
+    gap = int(subsize / 2)
     split = splitbase(
         IMAGE_DIR, SPLIT_DIR,
-        subsize=768, gap=384, ext='.jpg'
+        subsize=subsize, gap=gap, ext='.jpg'
     )
 
     # Resize image before cut
