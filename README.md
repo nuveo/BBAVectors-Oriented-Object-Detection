@@ -115,6 +115,9 @@ Please zip and upload the generated `merge_dota` for DOTA [Task1](https://captai
 
 
 ## Docker
+
+Before running the service using docker, you need to install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker). This toolkit is mandatory since the service is prepared to be executed with gpu.
+
 ### Building image
 ```bash
 docker build -t "bbavectors" .
