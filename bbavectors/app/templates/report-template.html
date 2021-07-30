@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>On point zoom with Scrollwheel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            outline: 0;
+            overflow: hidden;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #zoom {
+            width: 100%;
+            height: 100%;
+            transform-origin: 0px 0px;
+            transform: scale(1) translate(0px, 0px);
+            cursor: grab;
+        }
+        div#zoom > img {
+            width: 100%;
+            height: auto;
+        }
+        .menu {
+            width: 30%;
+            height: 100vh;
+            background: #01436e;
+            color: rgb(235, 235, 235);
+        }
+        .menu-content {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+        table {
+            border-collapse:separate;
+            width: 100%;
+        }
+        
+        .results-table {
+            table-layout: fixed;
+            font-size: 20px;
+        }
+        .results-table * {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid rgb(135, 140, 156);
+            background-color: rgb(39, 79, 126);
+        }
+    </style>
+  </head>
+  <body>
+
+    <table>
+        <tr>
+            <td class="menu">
+                <div class="menu-content">
+                    <h1 style="margin: 10px;">Report</h1>
+                    <table class="results-table">
+                        <tr>
+                            <th>Classe</th>
+                            <th>Total</th>
+                        </tr>
+                        {% for key in results %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ results[key] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+            </td>
+            <td style="width:70%">
+                <div>
+                    <div class="zoom_outer">
+                    <div id="zoom">
+                        <img src="{{ image }}" alt="zoom">
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+    <script>
+      var scale = 1,
+        panning = false,
+        pointX = 0,
+        pointY = 0,
+        start = { x: 0, y: 0 },
+        zoom = document.getElementById("zoom");
+
+      function setTransform() {
+        zoom.style.transform = "translate(" + pointX + "px, " + pointY + "px) scale(" + scale + ")";
+      }
+
+      zoom.onmousedown = function (e) {
+        e.preventDefault();
+        start = { x: e.clientX - pointX, y: e.clientY - pointY };
+        panning = true;
+      }
+
+      zoom.onmouseup = function (e) {
+        panning = false;
+      }
+
+      zoom.onmousemove = function (e) {
+        e.preventDefault();
+        if (!panning) {
+          return;
+        }
+        pointX = (e.clientX - start.x);
+        pointY = (e.clientY - start.y);
+        setTransform();
+      }
+
+      zoom.onwheel = function (e) {
+        e.preventDefault();
+        var xs = (e.clientX - pointX) / scale,
+          ys = (e.clientY - pointY) / scale,
+          delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
+        (delta > 0) ? (scale *= 1.2) : (scale /= 1.2);
+        pointX = e.clientX - xs * scale;
+        pointY = e.clientY - ys * scale;
+
+        setTransform();
+      }
+    </script>
+  </body>
+  </html>

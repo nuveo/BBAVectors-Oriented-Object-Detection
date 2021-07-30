@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
+from .report import render_html
 from bbavectors import WORK_DIR, TEMP_DIR
 from bbavectors.models import ctrbox_net
 from bbavectors.decoder import DecDecoder
@@ -264,8 +265,11 @@ def save_results(image_path, results):
         "labels_count": count
     }
 
-    output_path = os.path.join(results_dir, image_id + "_detections.jpg")
+    output_file = image_id + "_detections.jpg"
+    output_path = os.path.join(results_dir, output_file)
     plot_full_image(results, image_path, output_path)
+
+    render_html(output_file, count, results_dir)
 
     json_path = os.path.join(results_dir, image_id + '.json')
     with open(json_path, 'w') as fp:

@@ -13,7 +13,8 @@ requirements = [
     'Shapely==1.7.1',
     'matplotlib==3.0.3',
     'yacs==0.1.8',
-    'tqdm>=4.46.0'
+    'tqdm>=4.46.0',
+    'Jinja2==3.0.1'
 ]
 
 setup(
