@@ -91,26 +91,8 @@ class ObjectDetection:
         return results
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='BBAVectors')
-    parser.add_argument('--model_dir', required=True,
-                        type=str, help='Model weights directory.')
-    parser.add_argument('--image', required=True,
-                        type=str, help='Full image path.')
-    parser.add_argument('--altitude', default=120,
-                        type=int, help='Drone photo altitude in meters.')
-    parser.add_argument('--plot', default=False, action='store_true')
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
-
-    model = ObjectDetection(args.model_dir)
-
-    preds = model.predict(
-        args.image, altitude=args.altitude, plot=args.plot)
-
-    save_results(args.image, preds)
-
+def run_inference(model_dir, image_path, altitude, plot):
+    model = ObjectDetection(model_dir)
+    preds = model.predict(image_path, altitude=altitude, plot=plot)
+    save_results(image_path, preds)
     print("Finished!")

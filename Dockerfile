@@ -9,7 +9,7 @@ WORKDIR BBAVectors-Oriented-Object-Detection
 RUN cd DOTA_devkit && \
     swig -c++ -python polyiou.i && \
     python setup.py build_ext --inplace && \
-    cd .. && python -m pip install -e . && \
+    cd .. && python -m pip install -e .[infer] && \
     python -m pip install opencv-python-headless==4.5.3.56
 
 RUN apt-get autoremove -y && \
