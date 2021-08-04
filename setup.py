@@ -14,7 +14,7 @@ requirements = [
     'matplotlib==3.0.3',
     'yacs==0.1.8',
     'tqdm>=4.46.0',
-    'Jinja2==3.0.1'
+    'Jinja2==2.11.2'
 ]
 
 setup(
