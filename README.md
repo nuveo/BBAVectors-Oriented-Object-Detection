@@ -40,7 +40,7 @@ Install the [DOTA development kit](/datasets/DOTA_devkit/README.md) and the BBA 
 3. install the project modules
 ```bash
     cd $PROJECT_FOLDER
-    pip install -e .
+    pip install -e .[infer]
 ```
 
 After install this package, you can start your experiments. I suggest you start by the `demo.ipynb` this file has a step by step instructions to guide you through the basics commands.
@@ -124,8 +124,23 @@ docker build -t "bbavectors" .
 ```
 
 ### Testing
-```bash
-bash run-docker.sh <model-dir> <image-path> <drone-altitude>  
+```
+usage: bbavectors [-h] [--plot] [--cpu]
+                  env weights_dir image_path drone_altitude
 
-Ex: bash run-docker.sh /home/docs/model_weights/ /home/docs/image-test.jpg 45
+BBAVectors
+
+positional arguments:
+  env             Execution environment [docker/local]
+  weights_dir     Weights directory
+  image_path      Image path
+  drone_altitude  Drone altitude
+
+optional arguments:
+  -h, --help      show this help message and exit
+  --plot
+  --cpu
+
+Usage example:
+$ bbavectors docker /home/docs/model_weights/ /home/docs/image-test.jpg 45
 ```
