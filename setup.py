@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 from bbavectors import __version__
 from distutils.core import setup
 
@@ -25,7 +25,8 @@ extras = {
 setup(
     # Metadata
     name='bbavectors',
-    entry_points=dict(console_scripts=["bbavectors=bbavectors.app.main:main"]),
+    entry_points=dict(
+        console_scripts=["bbavectors=bbavectors.app.main:main"]),
     version=__version__,
     author='Yi, Jingru and Wu, Pengxiang and Liu, Bo and Huang, Qiaoying and Qu, Hui and Metaxas, Dimitris',
     url='https://github.com/yijingru/BBAVectors-Oriented-Object-Detection',
@@ -33,7 +34,7 @@ setup(
     long_description=long_description,
     license='MIT',
     # Package info
-    packages=['bbavectors', 'DOTA_devkit'],
+    packages=find_packages(),
     zip_safe=True,
     include_package_data=True,
     install_requires=requirements,
