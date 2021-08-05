@@ -47,7 +47,7 @@ def main():
     results_path = os.getcwd()
 
     if args.env == "local":
-        from bbavectors.app import run_inference
+        from bbavectors.app.object_detection import run_inference
         run_inference(
             args.weights_dir, args.image_path,
             altitude, args.plot
