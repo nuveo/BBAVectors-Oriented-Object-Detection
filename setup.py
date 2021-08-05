@@ -9,10 +9,10 @@ requirements = [
     'attrdict==2.0.1',
     'opencv-python==4.5.3.56',
     'Shapely==1.7.1',
-    'matplotlib==3.0.3',
+    'matplotlib>=3.1.3',
     'yacs==0.1.8',
     'tqdm>=4.46.0',
-    'Jinja2==2.11.2'
+    'Jinja2==3.0.1'
 ]
 
 extras = {
