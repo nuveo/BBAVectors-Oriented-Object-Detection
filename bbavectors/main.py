@@ -1,11 +1,7 @@
 import os
 import argparse
 from bbavectors import train, test, eval
-from attrdict import AttrDict
 from bbavectors import ROOT
-from datasets.dataset_dota import DOTA
-from datasets.dataset_hrsc import HRSC
-from datasets.dataset_custom import CUSTOM
 from bbavectors.models import ctrbox_net
 from bbavectors.decoder import DecDecoder
 
@@ -14,7 +10,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description='BBAVectors Implementation')
     parser.add_argument('--num_epoch', type=int,
                         default=1, help='Number of epochs')
-    parser.add_argument('--batch_size', type=int, default=1,
+    parser.add_argument('--num_classes', type=int,
+                        default=1, help='Total number of classes')
+    parser.add_argument('--batch_size', type=int, default=8,
                         help='Number of batch size')
     parser.add_argument('--num_workers', type=int,
                         default=4, help='Number of workers')
@@ -26,7 +24,7 @@ def parse_args():
                         help='Resized image width')
     parser.add_argument('--K', type=int, default=500,
                         help='Maximum of objects')
-    parser.add_argument('--conf_thresh', type=float, default=0.18,
+    parser.add_argument('--conf_thresh', type=float, default=0.3,
                         help='Confidence threshold, 0.1 for general evaluation')
     parser.add_argument('--ngpus', type=int, default=1,
                         help='Number of gpus, ngpus>1 for multigpu')
@@ -34,8 +32,6 @@ def parse_args():
                         default='', help='Weights resumed in training')
     parser.add_argument('--resume', type=str, default='model_last.pth',
                         help='Weights resumed in testing and evaluation')
-    parser.add_argument('--dataset', type=str,
-                        default='custom', help='Name of dataset')
     parser.add_argument('--data_dir', type=str,
                         default='datasplit', help='Data directory')
     parser.add_argument('--phase', type=str, default='test',
@@ -50,9 +46,7 @@ def main(args):
     if len(args.data_dir.split("/")) == 1:
         args.data_dir = os.path.join(ROOT, 'datasets', args.data_dir)
 
-    dataset = {'dota': DOTA, 'hrsc': HRSC, 'custom': CUSTOM}
-    num_classes = {'dota': 15, 'hrsc': 1, 'custom': 3}
-    heads = {'hm': num_classes[args.dataset],
+    heads = {'hm': args.num_classes,
              'wh': 10,
              'reg': 2,
              'cls_theta': 1
@@ -66,10 +60,9 @@ def main(args):
 
     decoder = DecDecoder(K=args.K,
                          conf_thresh=args.conf_thresh,
-                         num_classes=num_classes[args.dataset])
+                         num_classes=args.num_classes)
     if args.phase == 'train':
-        ctrbox_obj = train.TrainModule(dataset=dataset,
-                                       num_classes=num_classes,
+        ctrbox_obj = train.TrainModule(num_classes=args.num_classes,
                                        model=model,
                                        decoder=decoder,
                                        down_ratio=down_ratio)
@@ -77,11 +70,11 @@ def main(args):
         ctrbox_obj.train_network(args)
     elif args.phase == 'test':
         ctrbox_obj = test.TestModule(
-            dataset=dataset, num_classes=num_classes, model=model, decoder=decoder)
+            num_classes=args.num_classes, model=model, decoder=decoder)
         ctrbox_obj.test(args, down_ratio=down_ratio)
     else:
         ctrbox_obj = eval.EvalModule(
-            dataset=dataset, num_classes=num_classes, model=model, decoder=decoder)
+            num_classes=args.num_classes, model=model, decoder=decoder)
         ctrbox_obj.evaluation(args, down_ratio=down_ratio)
 
 

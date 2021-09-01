@@ -6,25 +6,28 @@ import numpy as np
 from DOTA_devkit.ResultMerge_multi_process import mergebypoly
 
 
-class CUSTOM(BaseDataset):
-    def __init__(self, data_dir, phase, input_h=None, input_w=None, down_ratio=None):
-        super(CUSTOM, self).__init__(
+def _load_categories(label_path):
+    cats = []
+    for file in glob.glob(os.path.join(label_path, "*.txt")):
+        with open(file, 'r') as f:
+            for line in f.readlines():
+                cats.append(line.split(' ')[8])
+    return np.unique(cats).tolist()
+
+
+class Dataset(BaseDataset):
+    def __init__(self, data_dir, phase, num_classes, input_h=None, input_w=None, down_ratio=None):
+        super(Dataset, self).__init__(
             data_dir, phase, input_h, input_w, down_ratio)
-        self.category = [
-            'small-vehicle',
-            'medium-vehicle',
-            'large-vehicle'
-        ]
-        self.color_pans = [
-            (255, 0, 0),
-            (0, 255, 0),
-            (0, 0, 255),
-        ]
-        self.num_classes = len(self.category)
-        self.cat_ids = {cat: i for i, cat in enumerate(self.category)}
-        self.img_ids = self.load_img_ids()
         self.image_path = os.path.join(data_dir, 'images')
         self.label_path = os.path.join(data_dir, 'labelTxt')
+        self.category = _load_categories(self.label_path)
+        print(self.category)
+        breakpoint()
+        self.num_classes = len(self.category)
+        assert num_classes == self.num_classes
+        self.cat_ids = {cat: i for i, cat in enumerate(self.category)}
+        self.img_ids = self.load_img_ids()
 
     def load_img_ids(self):
         files = os.listdir(os.path.join(self.data_dir, 'images'))

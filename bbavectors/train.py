@@ -7,6 +7,7 @@ import torch.nn as nn
 import loss
 from tqdm import tqdm
 from . import func_utils
+from datasets.dataset import Dataset
 from bbavectors import WORK_DIR
 
 
@@ -23,12 +24,9 @@ def collater(data):
 
 
 class TrainModule(object):
-    def __init__(self, dataset, num_classes, model, decoder, down_ratio):
+    def __init__(self, num_classes, model, decoder, down_ratio):
         torch.manual_seed(317)
-        self.dataset = dataset
-        self.dataset_phase = {'dota': ['train'],
-                              'hrsc': ['train', 'test'],
-                              'custom': ['train']}
+        self.dataset_phase = ['train']  # hrsc = ['train', 'test']
         self.num_classes = num_classes
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu")
@@ -113,14 +111,13 @@ class TrainModule(object):
         criterion = loss.LossAll()
         print('Setting up data...')
 
-        dataset_module = self.dataset[args.dataset]
-
-        dsets = {x: dataset_module(data_dir=args.data_dir,
-                                   phase=x,
-                                   input_h=args.input_h,
-                                   input_w=args.input_w,
-                                   down_ratio=self.down_ratio)
-                 for x in self.dataset_phase[args.dataset]}
+        dsets = {x: Dataset(data_dir=args.data_dir,
+                            phase=x,
+                            num_classes=args.num_classes,
+                            input_h=args.input_h,
+                            input_w=args.input_w,
+                            down_ratio=self.down_ratio)
+                 for x in self.dataset_phase}
 
         dsets_loader = {}
         dsets_loader['train'] = torch.utils.data.DataLoader(dsets['train'],
@@ -154,7 +151,7 @@ class TrainModule(object):
                                 self.model,
                                 self.optimizer)
 
-            if 'test' in self.dataset_phase[args.dataset] and epoch % 5 == 0:
+            if 'test' in self.dataset_phase and epoch % 5 == 0:
                 mAP = self.dec_eval(args, dsets['test'])
                 ap_list.append(mAP)
                 np.savetxt(os.path.join(save_path, 'ap_list.txt'),
