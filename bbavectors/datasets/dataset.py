@@ -22,8 +22,6 @@ class Dataset(BaseDataset):
         self.image_path = os.path.join(data_dir, 'images')
         self.label_path = os.path.join(data_dir, 'labelTxt')
         self.category = _load_categories(self.label_path)
-        print(self.category)
-        breakpoint()
         self.num_classes = len(self.category)
         assert num_classes == self.num_classes
         self.cat_ids = {cat: i for i, cat in enumerate(self.category)}
