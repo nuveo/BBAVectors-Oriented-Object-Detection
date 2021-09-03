@@ -34,16 +34,22 @@ class TrainModule(object):
         self.decoder = decoder
         self.down_ratio = down_ratio
 
-    def save_model(self, path, epoch, model, optimizer):
+    def save_model(self, path, epoch, model, loss, optimizer=None):
         if isinstance(model, torch.nn.DataParallel):
             state_dict = model.module.state_dict()
         else:
             state_dict = model.state_dict()
+
+        if optimizer is None:
+            optimizer_state_dict = None
+        else:
+            optimizer_state_dict = optimizer.state_dict()
+
         torch.save({
             'epoch': epoch,
             'model_state_dict': state_dict,
-            'optimizer_state_dict': optimizer.state_dict(),
-            # 'loss': loss
+            'optimizer_state_dict': optimizer_state_dict,
+            'loss': loss
         }, path)
 
     def load_model(self, model, optimizer, resume, strict=True):
@@ -73,14 +79,15 @@ class TrainModule(object):
                     print('No param {}.'.format(k))
                     state_dict[k] = model_state_dict[k]
         model.load_state_dict(state_dict, strict=False)
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        if 'optimizer_state_dict' in checkpoint:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         for state in optimizer.state.values():
             for k, v in state.items():
                 if isinstance(v, torch.Tensor):
                     state[k] = v.cuda()
         epoch = checkpoint['epoch']
-        # loss = checkpoint['loss']
-        return model, optimizer, epoch
+        loss = checkpoint.get('loss', np.inf)
+        return model, optimizer, epoch, loss
 
     def train_network(self, args):
 
@@ -90,13 +97,14 @@ class TrainModule(object):
             self.optimizer, gamma=0.96, last_epoch=-1)
         save_path = os.path.join(WORK_DIR, 'weights')
         start_epoch = 1
+        best_loss = np.inf
 
         # add resume part for continuing training when break previously, 10-16-2020
         if args.resume_train:
-            self.model, self.optimizer, start_epoch = self.load_model(self.model,
-                                                                      self.optimizer,
-                                                                      args.resume_train,
-                                                                      strict=True)
+            self.model, self.optimizer, start_epoch, best_loss = self.load_model(self.model,
+                                                                                 self.optimizer,
+                                                                                 args.resume_train,
+                                                                                 strict=True)
         # end
 
         if not os.path.exists(save_path):
@@ -130,7 +138,6 @@ class TrainModule(object):
 
         print('Starting training...')
         train_loss = []
-        best_loss = np.inf
         ap_list = []
         for epoch in range(start_epoch, args.num_epoch+1):
             print('-'*10)
@@ -149,7 +156,7 @@ class TrainModule(object):
                 self.save_model(os.path.join(save_path, 'model_best.pth'),
                                 epoch,
                                 self.model,
-                                self.optimizer)
+                                best_loss)
 
             if 'test' in self.dataset_phase and epoch % 5 == 0:
                 mAP = self.dec_eval(args, dsets['test'])
@@ -160,6 +167,7 @@ class TrainModule(object):
             self.save_model(os.path.join(save_path, 'model_last.pth'),
                             epoch,
                             self.model,
+                            best_loss,
                             self.optimizer)
 
     def run_epoch(self, phase, data_loader, criterion):

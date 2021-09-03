@@ -8,7 +8,7 @@ fi
 weights_dir="${1}"
 image_name=$(basename -- "$2")
 image_dir="$( cd "$(dirname "$2")" >/dev/null 2>&1 ; pwd -P )"
-drone_altitude=$3
+resolution=$3
 results_path=$(pwd)/results
 
 mkdir -p $results_path
@@ -21,5 +21,5 @@ docker run --rm -it --gpus=all \
 	python ./bbavectors/app/object_detection.py \
 		--model_dir /weights_dir/"$weight_dir" \
 		--image /image_dir/"$image_name" \
-		--altitude $drone_altitude --plot
+		--resolution $resolution --plot
 
