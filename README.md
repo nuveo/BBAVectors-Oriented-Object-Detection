@@ -126,7 +126,7 @@ docker build -t "bbavectors" .
 ### Testing
 ```
 usage: bbavectors [-h] [--plot] [--cpu]
-                  env weights_dir image_path drone_altitude
+                  env weights_dir image_path resolution
 
 BBAVectors
 
@@ -134,7 +134,7 @@ positional arguments:
   env             Execution environment [docker/local]
   weights_dir     Weights directory
   image_path      Image path
-  drone_altitude  Drone altitude
+  resolution      Photo resolution measured in pixel per centimeters 
 
 optional arguments:
   -h, --help      show this help message and exit

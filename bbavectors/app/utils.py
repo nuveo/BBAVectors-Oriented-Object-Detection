@@ -87,27 +87,7 @@ def clear_temp_folder():
     os.makedirs(TEMP_DIR)
 
 
-def convert_altitude_to_cmpx(alt, cfg):
-    cfg_res = dict(cfg.RESOLUTION)
-    if not cfg_res:
-        return 1.0
-
-    if alt in cfg_res:
-        return cfg_res[alt]
-
-    res = sorted(list(cfg_res.items()))
-    idx = bisect.bisect(res, (alt, 0))
-    if idx == 0 or idx == len(res):
-        return res[max(idx-1, 0)]
-
-    # interpolate
-    min_alt, min_cmpx = res[idx-1]
-    max_alt, max_cmpx = res[idx]
-    cmpx = max_cmpx * ((alt - min_alt) / max_alt) + min_cmpx
-    return cmpx
-
-
-def generate_splits(image, altitude, cfg):
+def generate_splits(image, resolution, cfg):
     clear_temp_folder()
     IMAGE_DIR = os.path.join(TEMP_DIR, 'image')
     SPLIT_DIR = os.path.join(TEMP_DIR, 'split')
@@ -118,11 +98,8 @@ def generate_splits(image, altitude, cfg):
 
     # Compute rate
     rate = cfg.RESIZE_RATE
-    orig_altitude = cfg.PHOTO_ALTITUDE
-
-    cmpx = convert_altitude_to_cmpx(altitude, cfg)
-    orig_cmpx = convert_altitude_to_cmpx(orig_altitude, cfg)
-    rate = rate * cmpx / orig_cmpx
+    train_resolution = cfg.TRAIN_RESOLUTION_PX_CM
+    rate = rate * (train_resolution / resolution)
     print("Resize rate: %.4f" % (rate))
 
     # Split all images

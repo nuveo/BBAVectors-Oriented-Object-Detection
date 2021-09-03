@@ -25,11 +25,8 @@ _C.CATEGORIES = []
 # Image resize rate.
 _C.RESIZE_RATE = 1.0
 
-# Altitude the photo was taken in meters.
-_C.PHOTO_ALTITUDE = 120
-
-# Resolution references in cm/px for different altitudes.
-_C.RESOLUTION = []
+# Resolution reference in px/cm used during model training.
+_C.TRAIN_RESOLUTION_PX_CM = 1.0
 
 
 def export_config(path):

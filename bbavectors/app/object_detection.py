@@ -27,17 +27,19 @@ class ObjectDetection:
         self.model, self.decoder = load_model(
             model_dir, self.cfg, self.device)
 
-    def predict(self, image_path, altitude, plot=False):
+    def predict(self, image_path, resolution, plot=False):
         init_time = time.time()
         categories = self.cfg.CATEGORIES
         results = {cat: defaultdict(list) for cat in categories}
+        if resolution == 0:
+            resolution = self.cfg.TRAIN_RESOLUTION_PX_CM
 
         orig_image = cv2.imread(image_path)
         if orig_image is None:
             return None
 
         print("Generating image splits. This may take a while.")
-        image_paths = generate_splits(orig_image, altitude, self.cfg)
+        image_paths = generate_splits(orig_image, resolution, self.cfg)
         del orig_image
 
         print("Start inference.")
@@ -91,8 +93,8 @@ class ObjectDetection:
         return results
 
 
-def run_inference(model_dir, image_path, altitude, plot):
+def run_inference(model_dir, image_path, resolution, plot):
     model = ObjectDetection(model_dir)
-    preds = model.predict(image_path, altitude=altitude, plot=plot)
+    preds = model.predict(image_path, resolution=resolution, plot=plot)
     save_results(image_path, preds)
     print("Finished!")
